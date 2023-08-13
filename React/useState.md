@@ -1,10 +1,6 @@
-useState 여기에 적어보자
-
 # All in one useState
 
 ## **함수형 컴포넌트의 상태 관리**
-
-# 링크정리
 
 [pjqnl16lm7 - CodeSandbox](https://codesandbox.io/s/pjqnl16lm7?file=/src/ProfilePageFunction.js)
 
@@ -12,9 +8,9 @@ useState 여기에 적어보자
   - Props 는 react 에서 불변 / this 는 변경가능, 조작가능
 - 함수형 컴포넌트는 렌더링이 발생하면 함수 자체가 다시 호출
   - render 될 때의 값을 유지
-    ⇒ 상태를 관리하려면 함수가 다시 호출되었을 때 이전 상태를 기억해야 함
-    ⇒ useState 는 클로저를 통해 이 문제를 해결
-    > 클로저 : 내부 함수에서 상위 함수 스코프의 변수에 접근할수 있는 것을 의미
+  ⇒ 상태를 관리하려면 함수가 다시 호출되었을 때 이전 상태를 기억해야 함
+  ⇒ useState 는 클로저를 통해 이 문제를 해결
+  > 클로저 : 내부 함수에서 상위 함수 스코프의 변수에 접근할수 있는 것을 의미
 
 ## 왜 hooks 를 사용해야 될까?
 
@@ -128,11 +124,9 @@ const [count, setCount] = useState(0) // 일반적인 사용 예시
 - state
   - 새값과 이전값을 비교해서 동일하면 렌더링을 건너뜀 ⇒ react 최적화
 - set 함수
-
   - return 이 없음
   - 다음 렌더링에 대한 상태 변수만 업데이트
   - 이미 실행중인 코드의 현재 상태는 변경되지 않음
-
     ```jsx
     import React from "react";
     import { useState } from "react";
@@ -225,6 +219,7 @@ function createInitialTodos() {
 export default function TodoList() {
   // const [todos, setTodos] = useState(createInitialTodos());
   // const [todos, setTodos] = useState(createInitialTodos);
+  // const [todos, setTodos] = useState(()=> createInitialTodos());
   const [text, setText] = useState("");
 
   return (
@@ -258,4 +253,71 @@ initialState 에 함수를 호출하게 되면 반환된 배열이 초기값으�
 
 initialState 에 인자를 전달하게 되면 랜더링 될때마다 함수가 호출됨 ⇒ 랜더링마다 새로운 초기 값이 계산됨
 
-### useState 콜백에 대해서 공부해기
+initialState 콜백함수를 사용하면 초기값이 설정됨 ⇒ 렌더링마다 재실행 방지
+
+### 하나의 handle 에서 두번의 setState 를 사용
+
+```jsx
+export default function UseState1() {
+  const [count, setCount] = useState(() => initialData());
+
+  function initialData(): number {
+    return 0;
+  }
+
+  const dualCal = () => {
+    console.log(count);
+    setCount(count * 2);
+    console.log(count);
+    setCount(count + 1);
+  };
+  return (
+    <Container>
+      <P>count : {count}</P>
+      <Button onClick={() => setCount(count + 1)}>Count+</Button>
+      <code>setCount(count+1)</code>
+      <br />
+      <Button onClick={dualCal}>Count *2 +1 </Button>
+      <code>
+        setCount(count * 2) <br />
+        setCount(count + 1)
+      </code>
+    </Container>
+  );
+}
+```
+
+```jsx
+export default function UseState1() {
+  const [count, setCount] = useState(() => initialData());
+
+  function initialData(): number {
+    return 0;
+  }
+
+  const dualCal = () => {
+    setCount((pre) => {
+      // setState에 Callback 함수를 사용하면 첫번째 인자로 이전 state 값을 전달받는다.
+      console.log(pre);
+      return pre * 2;
+    });
+    setCount((pre) => {
+      console.log(pre);
+      return pre + 1;
+    });
+  };
+  return (
+    <Container>
+      <P>count : {count}</P>
+      <Button onClick={() => setCount(count + 1)}>Count+</Button>
+      <code>setCount(count+1)</code>
+      <br />
+      <Button onClick={dualCal}>Count *2 +1 </Button>
+      <code>
+        setCount((pre) =&gt; pre * 2) <br />
+        setCount((pre) =&gt; pre + 1)
+      </code>
+    </Container>
+  );
+}
+```
